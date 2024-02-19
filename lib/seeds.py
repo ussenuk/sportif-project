@@ -21,7 +21,7 @@ if __name__ == '__main__':
     fake = Faker()
 
 
-
+    members = []
     for _ in range(5):
         member = Member(
             first_name=fake.first_name(),
@@ -40,8 +40,11 @@ if __name__ == '__main__':
         session.add(member)
         session.commit()
 
+        members.append(member)
 
 
+
+    subscriptions = []
     subscription_names = {
         'Football': 50,
         'Basketball': 60,
@@ -58,15 +61,28 @@ if __name__ == '__main__':
         session.add(subscription)
         session.commit()
 
+        subscriptions.append(subscription)
 
-    # for _ in range(5):
-    #     news = News(
-    #         title=fake.sentence(nb_words=6),
-    #         content=fake.text(max_nb_chars=200)
-    #     )
+    news = []
+    for member in members:
+        for subscription in subscriptions:
+            #For each subscription, it picks a random number of members (between 1 and 5) to subscribe to news
+            for i in range(random.randint(1,5)):
+                member = random.choice(members)
 
-    #     # add and commit individually to get IDs back
-    #     session.add(news)
-    #     session.commit()
+                # Add the news 
+                new = News(
+                    title=fake.sentence(nb_words=6),
+                    content=fake.text(max_nb_chars=200),
+                    category=random.choice(list(subscription_names.keys())),
+                    subscription_id=subscription.id,
+                    member_id=member.id
+                )
 
-    # session.close()
+                news.append(new)
+        # save all news to the database
+                
+    session.bulk_save_objects(news)
+    session.commit()
+
+    session.close()
