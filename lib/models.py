@@ -343,4 +343,3 @@ class News(Base):
             f'title={self.title}, ' + \
             f'subscription_id={self.subscription_id}, ' + \
             f'member_id={self.member_id})'
-

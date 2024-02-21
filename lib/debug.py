@@ -130,8 +130,86 @@ if __name__ == '__main__':
                     print("Welcome back, {}!".format(member.username))
                     # List subscriptions
                     member.list_subscriptions(session)
+                    # Member is logged in, proceed with additional subscription
+                    print("\nAvailable subscriptions:")
+                    subscriptions = session.query(Subscription).all()
+                    if not subscriptions:
+                        print("There are currently no subscriptions available.")
+                        continue
+                    for index, subscription in enumerate(subscriptions):
+                        print(f" {index+1}. {subscription.name} (Price: {subscription.price} KES)")
 
+                    while True:
+                        try:
+                            subscription_choice = int(input("Enter the number of the subscription you want to subscribe to: "))
+                            if 1 <= subscription_choice <= len(subscriptions):
+                                break
+                            else:
+                                print("Invalid choice. Please choose a number between 1 and", len(subscriptions))
+                        except ValueError:
+                            print("Invalid input. Please enter a number.")
+                    subscription = subscriptions[subscription_choice - 1]
 
+                    #Subscribe using the method:**
+                    try:
+                        # subscription = session.query(Subscription).filter_by(name=subscription_name).first()
+                        member.subscribe_to_subscription(session, subscription.id)
+                        session.commit()
+                        print(f"Congratulations, {member.first_name}! You are now subscribed to {subscription.name}.")
+
+                        # # **NEW: Immediately display related news**
+                        # member.get_all_news_related_to_subscription(session)
+                    except ValueError as e:
+                        print(f"Error: {e}")
+                        session.rollback()
+
+        elif choice == "4":
+            # Cancel subscription
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+
+            member = session.query(Member).filter_by(username=username).first()
+
+            if member:
+                if member.validate_member_credentials(session, username, password):
+                    print("Welcome back, {}!".format(member.username))
+
+                    # List subscriptions
+                    member.list_subscriptions(session)
+
+                    if not member.subscriptions:
+                        print("You don't have any subscriptions to cancel.")
+                        continue
+
+                    # Prompt user to select subscription to cancel
+                    while True:
+                        try:
+                            subscription_choice = int(input("Enter the number of the subscription you want to cancel: "))
+                            if 1 <= subscription_choice <= len(member.subscriptions):
+                                break
+                            else:
+                                print("Invalid choice. Please choose a number between 1 and", len(member.subscriptions))
+                        except ValueError:
+                            print("Invalid input. Please enter a number.")
+
+                    subscription_to_cancel = member.subscriptions[subscription_choice - 1]
+
+                    # Confirm cancellation with user
+                    confirmation = input(f"Are you sure you want to cancel {subscription_to_cancel.name}? (y/n): ")
+                    if confirmation.lower() == 'y':
+                        try:
+                            member.subscriptions.remove(subscription_to_cancel)
+                            session.commit()
+                            print(f"Subscription {subscription_to_cancel.name} has been cancelled.")
+                        except Exception as e:
+                            print(f"Error canceling subscription: {e}")
+                            session.rollback()
+
+                else:
+                    print("Invalid username or password. Please try again.")
+            else:
+                print("No member found with that username.")
+                        
                 
         elif choice == "5":
             username = input("Enter your username: ")
