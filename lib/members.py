@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer,Float, String, DateTime, Table, ForeignKe
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from .news import News
-from .subscription import subscription_member
+from .subscription import subscription_member, Subscription
 from .models import Base
 
     
