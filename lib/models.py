@@ -33,6 +33,7 @@ class Subscription(Base):
 
     def __repr__(self):
         return f'Subscription: {self.name}'
+
     
 class Member(Base):
     __tablename__ = 'members'
@@ -116,7 +117,7 @@ class Member(Base):
             if not password:
                 print("password cannot be empty.")
                 continue
-            balance = 100
+            balance = 10
 
             return {
             'first_name': first_name,
@@ -277,8 +278,49 @@ class Member(Base):
             else:
                 print("Invalid input. Please enter '1' or '2'.")
     
-        
+    def top_up(self, session, amount):
+        """
+        Tops up the member's balance by a specified amount.
+
+        Args:
+            session: An SQLAlchemy session object.
+            amount: The amount to add to the member's balance (float).
+
+        Raises:
+            ValueError: If the provided amount is invalid (non-positive).
+        """
+        if amount <= 0:
+            raise ValueError("Invalid top-up amount. Please enter a positive number.")
+
+        self.balance += amount
+        session.add(self)
+        session.commit()
+
+        print(f"Top-up successful! Your new balance is {self.balance} KES.")    
     
+    def list_subscriptions(self, session):
+        """
+        Lists all subscriptions of the member.
+
+        Args:
+            session: An SQLAlchemy session object.
+
+        Returns:
+            None: Prints the name and price of each subscription to the console.
+        """
+
+        # Get all subscriptions of the member
+        subscriptions = self.subscriptions
+
+        # Check if any subscriptions found
+        if not subscriptions:
+            print("You haven't subscribed to any plans yet!")
+            return
+
+        # Print subscription details
+        print("Your current subscriptions:")
+        for index, subscription in enumerate(subscriptions):
+            print(f"{index + 1}. {subscription.name} (Price:{subscription.price} KES)")
     
     def __repr__(self):
         return f'Member: {self.name}'

@@ -7,7 +7,7 @@ import random
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models import Subscription, Member, News
+from models import Subscription, Member, News, subscription_member
 
 if __name__ == '__main__':
     engine = create_engine('sqlite:///sportif.db')
@@ -17,6 +17,7 @@ if __name__ == '__main__':
     session.query(Subscription).delete()
     session.query(Member).delete()
     session.query(News).delete()
+    session.query(subscription_member).delete()
 
     fake = Faker()
 
@@ -46,9 +47,9 @@ if __name__ == '__main__':
 
     subscriptions = []
     subscription_names = {
-        'Football': 50,
-        'Basketball': 60,
-        'Others': 70
+        'Football': 5,
+        'Basketball': 6,
+        'Others': 7
     }
 
     for name, price in subscription_names.items():

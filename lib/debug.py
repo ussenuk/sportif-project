@@ -19,9 +19,10 @@ if __name__ == '__main__':
         print("2. Member proceed to their News")
         print("3. Subscribe to another plan")
         print("4. Cancel subscription")
-        print("5. Exit")
+        print("5. Top-up your balance")
+        print("6. Exit")
 
-        choice = input ("Enter your choice (1-5): ")
+        choice = input ("Enter your choice (1-6): ")
 
         if choice == "1":
             # Registration and subscription combined
@@ -29,7 +30,7 @@ if __name__ == '__main__':
                 # Add registration details (ensure complete values)
                 member = Member()
                 registration_info = member.get_registration_details()
-                # print("Registration details:", registration_info)  # Verify contents
+                print("Registration details:", registration_info)  # Verify contents
 
                 member.add_member(session, **registration_info)
                 session.commit()
@@ -55,7 +56,8 @@ if __name__ == '__main__':
                 
                 # Display subscriptions with numeric choices
                 for index, subscription in enumerate(subscriptions):
-                    print(f" {index+1}. {subscription.name} (Price: {subscription.price}KES)")
+                    # print(f" {index+1}. {subscription.name} (Price: {subscription.price}KES)")
+                    print(f" {index+1}. {subscription.name} (Price: {subscription.price} KES)")
                 #User choice and validation:**
                 while True:
                     try:
@@ -103,15 +105,60 @@ if __name__ == '__main__':
                     print(f"Welcome back, {member_instance.username}!\n Your subscription is valid and your balance is {member_instance.balance} KES")
                     # proceed to the news immediately
                     # Access and display news using get_all_news_related_to_subscription
-                    member_instance.get_all_news_related_to_subscription(session)
-
+                     # Deduct 5 KES from balance
+                    if member_instance.balance >= 3:
+                        member_instance.balance -= 3
+                        session.commit()
+                        print("3 KES deducted from your balance for this login session. New balance:", member_instance.balance)
+                        print("Enjoy Browsing Your Sport News")
+                        member_instance.get_all_news_related_to_subscription(session)
+                    else:
+                        print("Insufficient balance to deduct 3 KES for login. Please top up to continue.")
+                        # Call top-up functionality here
+                        
 
                 else:
                     print("Invalid username or password. Please try again.")
+        
+        elif choice == "3":
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+
+            member = session.query(Member).filter_by(username=username).first()
+            if member:
+                if member.validate_member_credentials(session, username, password):
+                    print("Welcome back, {}!".format(member.username))
+                    # List subscriptions
+                    member.list_subscriptions(session)
+
 
                 
-
         elif choice == "5":
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+
+            member = session.query(Member).filter_by(username=username).first()
+
+            if member:
+                if member.validate_member_credentials(session, username, password):
+                    print("Welcome back, {}!".format(member.username))
+
+                    while True:
+                        try:
+                            top_up_amount = float(input("Enter the amount you want to top up (KES): "))
+                            if top_up_amount <= 0:
+                                raise ValueError("Invalid top-up amount. Please enter a positive number.")
+                            break
+                        except ValueError:
+                            print("Invalid input. Please enter a valid amount.")
+
+                    member.top_up(session, top_up_amount)
+                    print("Top-up successful! Your new balance is {} KES.".format(member.balance))
+                else:
+                    print("Invalid username or password. Please try again.")
+            else:
+                print("No member found with that username.")
+        elif choice == "6":
             print("Exiting...")
             break
 
